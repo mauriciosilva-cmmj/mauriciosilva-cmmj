@@ -1,0 +1,153 @@
+name: NextVersion
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - package.json
+      - .github/workflows/nextversion.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: nextversion-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update-version:
+    if: ${{ github.actor != 'github-actions[bot]' && github.event.before != '0000000000000000000000000000000000000000' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Preparar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Calcular nova versão
+        id: version
+        env:
+          NEXTVERSION_FILE_PATH: ${{ vars.NEXTVERSION_FILE_PATH || 'package.json' }}
+          NEXTVERSION_VERSION_FIELD: ${{ vars.NEXTVERSION_VERSION_FIELD || 'version' }}
+          NEXTVERSION_MINOR_TYPES: ${{ vars.NEXTVERSION_MINOR_TYPES || 'feat,migration,chore' }}
+          NEXTVERSION_PATCH_TYPES: ${{ vars.NEXTVERSION_PATCH_TYPES || 'fix' }}
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const { execFileSync } = require('node:child_process');
+
+          function setOutput(name, value) {
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, name + '=' + value + '\n');
+          }
+
+          const baseSha = process.env.BASE_SHA;
+          const headSha = process.env.HEAD_SHA;
+          const commits = execFileSync('git', ['rev-list', '--no-merges', '--reverse', baseSha + '..' + headSha], { encoding: 'utf8' })
+            .trim()
+            .split(/\r?\n/)
+            .filter(Boolean);
+
+          if (commits.length === 0) {
+            console.log('Nenhum commit novo para classificar.');
+            setOutput('changed', 'false');
+            process.exit(0);
+          }
+
+          const minorTypes = new Set((process.env.NEXTVERSION_MINOR_TYPES || 'feat,migration,chore')
+            .split(',').map(function (type) { return type.trim().toLowerCase(); }).filter(Boolean));
+          const patchTypes = new Set((process.env.NEXTVERSION_PATCH_TYPES || 'fix')
+            .split(',').map(function (type) { return type.trim().toLowerCase(); }).filter(Boolean));
+
+          let impact = 'none';
+          const classified = [];
+          for (const sha of commits) {
+            const message = execFileSync('git', ['show', '-s', '--format=%B', sha], { encoding: 'utf8' }).trim();
+            if (!message || /\[skip nextversion\]/i.test(message)) continue;
+
+            const header = message.split(/\r?\n/, 1)[0].trim();
+            const match = header.match(/^([a-z][a-z0-9-]*)(?:\([^)]+\))?(!)?:\s*/i);
+            const type = match ? match[1].toLowerCase() : '';
+            const breaking = Boolean(match && match[2]) || /^\s*BREAKING(?: CHANGE|-CHANGE)\s*:/im.test(message);
+
+            let commitImpact = 'none';
+            if (breaking) commitImpact = 'major';
+            else if (minorTypes.has(type)) commitImpact = 'minor';
+            else if (patchTypes.has(type)) commitImpact = 'patch';
+
+            classified.push((type || 'sem tipo') + ': ' + commitImpact);
+            if (commitImpact === 'major' || (commitImpact === 'minor' && impact !== 'major') || (commitImpact === 'patch' && impact === 'none')) {
+              impact = commitImpact;
+            }
+          }
+
+          console.log('Commits analisados: ' + commits.length);
+          console.log(classified.join('\n'));
+          if (impact === 'none') {
+            console.log('Nenhum tipo configurado pede aumento de versão; arquivo mantido.');
+            setOutput('changed', 'false');
+            process.exit(0);
+          }
+
+          const root = path.resolve(process.env.GITHUB_WORKSPACE);
+          const configuredPath = (process.env.NEXTVERSION_FILE_PATH || 'package.json').replaceAll('\\', '/');
+          if (path.posix.isAbsolute(configuredPath) || /^[a-z]:\//i.test(configuredPath) || configuredPath.split('/').includes('..')) {
+            throw new Error('NEXTVERSION_FILE_PATH deve ser relativo à raiz do repositório.');
+          }
+          const filePath = path.resolve(root, configuredPath);
+          if (filePath !== root && !filePath.startsWith(root + path.sep)) {
+            throw new Error('O arquivo de versão deve ficar dentro do repositório.');
+          }
+          if (!fs.existsSync(filePath)) throw new Error('Arquivo de versão não encontrado: ' + configuredPath);
+
+          const pkg = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+          const fieldPath = (process.env.NEXTVERSION_VERSION_FIELD || 'version').split('.');
+          if (fieldPath.length === 0 || fieldPath.some(function (key) { return !key || ['__proto__', 'prototype', 'constructor'].includes(key); })) {
+            throw new Error('NEXTVERSION_VERSION_FIELD inválido.');
+          }
+          let target = pkg;
+          for (const key of fieldPath.slice(0, -1)) {
+            if (!target || typeof target !== 'object' || !Object.prototype.hasOwnProperty.call(target, key)) {
+              throw new Error('Campo de versão não encontrado: ' + fieldPath.join('.'));
+            }
+            target = target[key];
+          }
+          const field = fieldPath[fieldPath.length - 1];
+          const currentVersion = target && target[field];
+          const versionMatch = String(currentVersion || '').match(/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/);
+          if (!versionMatch) throw new Error('A versão deve estar no formato X.Y.Z; valor atual: ' + currentVersion);
+
+          let major = Number(versionMatch[1]);
+          let minor = Number(versionMatch[2]);
+          let patch = Number(versionMatch[3]);
+          if (impact === 'major') { major += 1; minor = 0; patch = 0; }
+          else if (impact === 'minor') { minor += 1; patch = 0; }
+          else patch += 1;
+
+          const nextVersion = major + '.' + minor + '.' + patch;
+          target[field] = nextVersion;
+          fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+          console.log('Versão atualizada: ' + currentVersion + ' -> ' + nextVersion + ' (' + impact + ')');
+          setOutput('changed', 'true');
+          setOutput('version', nextVersion);
+          NODE
+
+      - name: Registrar a nova versão na main
+        if: steps.version.outputs.changed == 'true'
+        env:
+          NEXTVERSION_FILE_PATH: ${{ vars.NEXTVERSION_FILE_PATH || 'package.json' }}
+          NEXTVERSION_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- "$NEXTVERSION_FILE_PATH"
+          git commit -m "chore(release): v$NEXTVERSION_VERSION [skip nextversion]"
+          git push origin HEAD:main
