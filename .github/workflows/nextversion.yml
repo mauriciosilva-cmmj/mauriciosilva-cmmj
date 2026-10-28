@@ -16,11 +16,13 @@
 # 1. Copie este arquivo para .github/workflows/nextversion.yml.
 # 2. Troque "main" em on.push.branches e em "git push origin HEAD:main" pelo nome da branch principal.
 #    Revise paths-ignore: mantenha o workflow e acrescente o caminho do arquivo de versao escolhido.
-# 3. Em Settings > Secrets and variables > Actions > Variables, configure:
+# 3. Em Settings > Secrets and variables > Actions > Variables, configure, ou use o ultimo exemplo para varavel local:
 #    NEXTVERSION_FILE_PATH: caminho relativo a raiz do repositorio para o arquivo JSON (padrao: package.json).
 #    NEXTVERSION_VERSION_FIELD: campo JSON da versao (padrao: version; aceita caminho como app.version).
 #    NEXTVERSION_MINOR_TYPES: tipos que aumentam minor (padrao: feat,migration,chore).
 #    NEXTVERSION_PATCH_TYPES: tipos que aumentam patch (padrao: fix).
+# ou NEXTVERSION_PATCH_TYPES: ${{ vars.NEXTVERSION_PATCH_TYPES || 'fix' }}
+# ou NEXTVERSION_PATCH_TYPES: ${{ 'fix' }}
 # 4. Confirme que o arquivo/campo existem, que a versao segue X.Y.Z e que contents: write e permitido
 #    pela politica do repositorio/organizacao e pelas regras de protecao da branch principal.
 # 5. Use mensagens convencionais, por exemplo: feat: nova funcao, fix: correcao, feat!: mudanca incompativel.
@@ -61,10 +63,10 @@ jobs:
       - name: Calcular nova versão
         id: version
         env:
-          NEXTVERSION_FILE_PATH: ${{ vars.NEXTVERSION_FILE_PATH || 'package.json' }}
-          NEXTVERSION_VERSION_FIELD: ${{ vars.NEXTVERSION_VERSION_FIELD || 'version' }}
-          NEXTVERSION_MINOR_TYPES: ${{ vars.NEXTVERSION_MINOR_TYPES || 'feat,migration,chore' }}
-          NEXTVERSION_PATCH_TYPES: ${{ vars.NEXTVERSION_PATCH_TYPES || 'fix' }}
+          NEXTVERSION_FILE_PATH: ${{ 'package.json' }}
+          NEXTVERSION_VERSION_FIELD: ${{ 'version' }}
+          NEXTVERSION_MINOR_TYPES: ${{ 'feat,migration,chore' }}
+          NEXTVERSION_PATCH_TYPES: ${{ 'fix' }}
           BASE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
         run: |
