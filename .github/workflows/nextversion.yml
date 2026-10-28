@@ -26,6 +26,11 @@
 # 4. Confirme que o arquivo/campo existem, que a versao segue X.Y.Z e que contents: write e permitido
 #    pela politica do repositorio/organizacao e pelas regras de protecao da branch principal.
 # 5. Use mensagens convencionais, por exemplo: feat: nova funcao, fix: correcao, feat!: mudanca incompativel.
+# 6. Mantenha permissions: contents: write e verifique se as regras de proteção da branch permitem que o 
+#    GitHub Actions envie o commit.
+#    O arquivo de versão precisa ser JSON e conter uma versão no formato X.Y.Z. Não precisa criar um token 
+#    secreto: o workflow usa o GITHUB_TOKEN do GitHub. Após o merge ou push na branch configurada, o Action 
+#    calcula a versão e registra o commit automaticamente.
 # Estas configuracoes sao Variables, nao Secrets; o workflow usa o GITHUB_TOKEN fornecido pelo GitHub.
 
 name: NextVersion
