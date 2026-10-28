@@ -1,3 +1,31 @@
+# NextVersion - atualizacao automatica de versao SemVer
+# Arquivo: .github/workflows/nextversion.yml
+# Versao do arquivo: 1.0.0
+# Data: 2026-10-28
+# Autor: Mauricio Rodrigues da Silva (@mauriciosilva-cmmj)
+#
+# O que este workflow faz:
+# - Executa quando ha push na branch principal, inclusive apos merge de um PR.
+# - Analisa os commits novos do push usando Conventional Commits. BREAKING CHANGE ou "!" aumenta major;
+#   tipos listados em NEXTVERSION_MINOR_TYPES aumentam minor; NEXTVERSION_PATCH_TYPES aumentam patch.
+# - Se houver varios impactos, aplica apenas o maior. Commits sem tipo configurado nao alteram a versao.
+# - Atualiza o campo configurado em um arquivo JSON e cria/push um commit como github-actions[bot].
+# - Ignora o commit do bot e mensagens com [skip nextversion] para evitar reprocessamento.
+#
+# Para implantar em outro projeto:
+# 1. Copie este arquivo para .github/workflows/nextversion.yml.
+# 2. Troque "main" em on.push.branches e em "git push origin HEAD:main" pelo nome da branch principal.
+#    Revise paths-ignore: mantenha o workflow e acrescente o caminho do arquivo de versao escolhido.
+# 3. Em Settings > Secrets and variables > Actions > Variables, configure:
+#    NEXTVERSION_FILE_PATH: caminho relativo a raiz do repositorio para o arquivo JSON (padrao: package.json).
+#    NEXTVERSION_VERSION_FIELD: campo JSON da versao (padrao: version; aceita caminho como app.version).
+#    NEXTVERSION_MINOR_TYPES: tipos que aumentam minor (padrao: feat,migration,chore).
+#    NEXTVERSION_PATCH_TYPES: tipos que aumentam patch (padrao: fix).
+# 4. Confirme que o arquivo/campo existem, que a versao segue X.Y.Z e que contents: write e permitido
+#    pela politica do repositorio/organizacao e pelas regras de protecao da branch principal.
+# 5. Use mensagens convencionais, por exemplo: feat: nova funcao, fix: correcao, feat!: mudanca incompativel.
+# Estas configuracoes sao Variables, nao Secrets; o workflow usa o GITHUB_TOKEN fornecido pelo GitHub.
+
 name: NextVersion
 
 on:
