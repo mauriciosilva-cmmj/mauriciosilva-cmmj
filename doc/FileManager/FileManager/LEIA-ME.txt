@@ -1,0 +1,129 @@
+FILE MANAGER - ZIP E PROGRESSO
+Atualizacao: 26/11/2026
+Alvo: Trimui Smart Pro, Linux ARM64 (aarch64)
+
+COMO USAR
+1. Abra a pasta de destino no painel DIREITO.
+2. Volte ao painel de origem e destaque o arquivo .zip.
+3. Pressione X (menu de operacoes) e escolha "Extract ZIP > (direita)".
+   O destino e SEMPRE a pasta do painel direito, mesmo ao selecionar um
+   ZIP no proprio painel direito.
+4. Os arquivos e subpastas do ZIP serao extraidos diretamente na pasta
+   exibida no painel direito. O ZIP original permanece no lugar.
+
+Para varios ZIPs, selecione-os com SELECT e abra o mesmo menu.
+A opcao aparece quando todos os itens selecionados sao arquivos .zip.
+Extensoes .ZIP em maiusculas tambem sao reconhecidas.
+
+Copiar, mover, excluir e extrair exibem barra, percentual e contagem de
+itens. Copia e extracao tambem mostram o volume processado em MiB.
+Durante a leitura inicial, a tela mostra "Preparing" e calcula o total.
+Exclusao avanca por itens. Movimentacao usa renomeacao quando possivel
+no mesmo sistema de arquivos e copia em blocos entre sistemas diferentes;
+por isso, algumas movimentacoes podem terminar quase instantaneamente.
+
+B cancela. Os itens ja concluidos sao mantidos; o arquivo temporario
+que estava sendo gravado e removido. Exclusoes ja concluidas nao sao
+revertidas. Arquivos de origem so sao removidos depois de uma transferencia
+concluida. A confirmacao de exclusao foi mantida.
+
+Se o destino ja existir: Yes = substituir; Yes to all = substituir todos;
+Skip = pular; Cancel = cancelar. Pastas sao mescladas e os conflitos de
+arquivos sao confirmados individualmente, ate escolher Yes to all.
+Em caso de falha, a operacao para e exibe o erro.
+
+ZIP
+Suporta ZIP comum (Deflate/Stored) e ZIP64. Nao suporta ZIP protegido por
+senha, metodos de compressao diferentes ou links dentro do ZIP.
+Verifica CRC e rejeita caminhos absolutos, caminhos com ".." e links
+simbolicos no destino. Uma gravacao interrompida nao substitui um arquivo
+que ja existia: a troca acontece depois de concluir e sincronizar os dados.
+
+INSTALACAO
+O DinguxCommander deste diretorio ja foi atualizado.
+Para levar ao console, use FileManager-atualizado.zip. Extraia a pasta
+FileManager para a pasta Apps do cartao SD e aceite a substituicao dos
+arquivos dessa aplicacao. Nao copie tools/ ou build/ para o cartao.
+Nao e necessario instalar unzip ou Python no console.
+
+A configuracao trimui.cfg ajusta a tela para 1280x720 e define os botoes
+do Smart Pro. Configuracoes pessoais em ~/.config/commander.cfg continuam
+tendo prioridade sobre trimui.cfg. As preferencias salvas pelo menu
+(fontes e legenda) ficam em preferences.cfg e sao carregadas por ultimo.
+O arquivo launch.sh carrega trimui.cfg automaticamente.
+
+BACKUP / RESTAURACAO
+Os arquivos originais foram preservados em backup-original/.
+A versao anterior (ZIP e progresso, antes destas novas telas) esta em
+backup-zip-progresso/.
+Para voltar, substitua DinguxCommander e launch.sh pelos arquivos dessa
+pasta. O launcher original nao carrega trimui.cfg.
+
+CONFIGURACOES DE FONTE E LEGENDA
+Pressione Y, escolha Configuracoes e selecione o tamanho da fonte
+(8 a 16). Escolha Mostrar/Ocultar para a legenda e depois Salvar e voltar.
+Cancelar descarta as alteracoes. O tamanho e aplicado imediatamente e
+fica salvo para a proxima abertura. O espacamento das listas e menus
+acompanha a fonte. A legenda Y/X/B/A fica fixa no canto inferior direito,
+em uma area reservada que nao cobre os arquivos.
+
+Nao inclua preferences.cfg ao distribuir uma atualizacao, para preservar
+as escolhas feitas no console. Se houver falha de gravacao, o aplicativo
+exibe o erro e mantem as configuracoes anteriores.
+
+DISCOS NO RODAPE
+Mostra os volumes montados identificados como SDCARD, Pendrive e Memoria
+interna, com o nome do volume e os valores livre / total em GiB/MiB.
+Quando disponivel, usa o rotulo do volume; caso contrario, usa o nome da
+pasta de montagem. RO significa somente leitura. Se nao for possivel
+medir o espaco, mostra Indisponivel em vez de inventar uma capacidade.
+A lista se atualiza a cada 3 segundos na tela principal e apos operacoes.
+Mais de 3 volumes sao mostrados em paginas alternadas a cada 6 segundos.
+Y > Discos conectados mostra tambem a pasta e o dispositivo de cada disco.
+Volumes ainda nao montados nao tem pasta ou espaco utilizavel para exibir.
+
+CODIGO E COMPILACAO
+source/ contem o codigo-fonte do repositorio indicado pelo README original:
+https://github.com/od-contrib/commander
+A origem e as versoes estao registradas em source/ORIGEM.txt.
+As alteracoes locais estao tambem em alteracoes.patch.
+O codigo usa miniz 3.0.2, com a licenca em source/third_party/miniz/LICENSE.
+O descompactador e as bibliotecas C++ estao incorporados ao executavel;
+as bibliotecas SDL do console continuam sendo usadas.
+
+Recompilar no Windows neste ambiente:
+  python tools/build-trimui.py
+Saida: build/trimui/DinguxCommander
+Os scripts usam Zig 0.13.0 em tools/python-zig e as bibliotecas do SDK
+oficial do Smart Pro em tools/sdk. Nao altere essas bibliotecas do console.
+Uma recompilacao limpa pode ser feita indicando outro diretorio de build
+no script, ou removendo somente os objetos gerados em build/trimui.
+
+Testes do motor de arquivos no Windows:
+  python tools/build-tests.py
+  python source/tests/test_operations.py
+Previa da interface (usa uma janela SDL oculta e adaptadores de teste):
+  python tools/build-ui-preview.py
+Verificacao da arquitetura e dependencias:
+  python tools/verify-elf.py
+
+VALIDACAO
+26 testes do motor passaram; 1 teste de links simbolicos foi ignorado,
+pois o Windows nao permitiu criar o link sem privilegios adicionais.
+Foram cobertos progresso em arquivos grandes, arvores de pastas, arquivos
+vazios, sobrescrita, cancelamento, movimentacao, exclusao, ZIP64, nomes
+UTF-8, ZIP corrompido, ZIP criptografado e caminhos inseguros.
+A interface das barras de progresso e o cancelamento por teclado/controle
+foram exercitados no simulador SDL na versao anterior. As novas telas de
+configuracoes, legenda e discos foram compiladas e revisadas no codigo.
+O novo programa de testes de preferencias/discos compilou, mas a execucao
+foi bloqueada pelo Smart App Control do Windows (assinatura exigida).
+Esses novos testes e as novas telas ainda precisam de validacao em execucao.
+Teste preparado: python tools/test-preferences-storage.py
+Somente compilar: python tools/test-preferences-storage.py --compile-only
+O executavel foi compilado para ARM64 e suas dependencias SDL e versoes
+de GLIBC foram verificadas contra o SDK oficial (GLIBC ate 2.17).
+A execucao no aparelho fisico ainda precisa ser validada.
+
+O codigo upstream tambem exigiu uma correcao de nome de classe em
+ImageViewer::gamepadHold para compilar com suporte a SDL2.
