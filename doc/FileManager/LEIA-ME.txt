@@ -61,11 +61,12 @@ pasta. O launcher original nao carrega trimui.cfg.
 
 CONFIGURACOES DE FONTE E LEGENDA
 Pressione Y, escolha Configuracoes e selecione o tamanho da fonte
-(8 a 16). Escolha Mostrar/Ocultar para a legenda e depois Salvar e voltar.
+(8 a 24). Escolha Mostrar/Ocultar para a legenda e depois Salvar e voltar.
 Cancelar descarta as alteracoes. O tamanho e aplicado imediatamente e
 fica salvo para a proxima abertura. O espacamento das listas e menus
 acompanha a fonte. A legenda Y/X/B/A fica fixa no canto inferior direito,
-em uma area reservada que nao cobre os arquivos.
+sobre o painel direito, no formato de cruz (X acima, Y a esquerda,
+A a direita e B abaixo). Pode cobrir parte dos arquivos.
 
 Nao inclua preferences.cfg ao distribuir uma atualizacao, para preservar
 as escolhas feitas no console. Se houver falha de gravacao, o aplicativo
@@ -78,7 +79,9 @@ Quando disponivel, usa o rotulo do volume; caso contrario, usa o nome da
 pasta de montagem. RO significa somente leitura. Se nao for possivel
 medir o espaco, mostra Indisponivel em vez de inventar uma capacidade.
 A lista se atualiza a cada 3 segundos na tela principal e apos operacoes.
-Mais de 3 volumes sao mostrados em paginas alternadas a cada 6 segundos.
+O rodape apresenta ate 2 volumes lado a lado; se houver mais, as paginas
+alternam a cada 6 segundos. A barra e o percentual indicam espaco usado;
+os numeros mostram espaco livre e total.
 Y > Discos conectados mostra tambem a pasta e o dispositivo de cada disco.
 Volumes ainda nao montados nao tem pasta ou espaco utilizavel para exibir.
 
