@@ -13,7 +13,7 @@ mkdir -p "$sd/Apps"
 fail() { printf '%s\n' "$*" | tee -a "$log" >&2; exit 1; }
 for cmd in unzip sha256sum pgrep; do command -v "$cmd" >/dev/null 2>&1 || fail "Comando ausente: $cmd"; done
 [ -f "$archive" ] || fail "Coloque Scraper-atualizado.zip ao lado deste arquivo: $base"
-printf '%s  %s\n' 'fe4810b111393ee6b6a5915825f9cde15eba88b41102e96f02764b2a1e51812c' "$archive" | sha256sum -c - >> "$log" 2>&1 || fail 'ZIP nao corresponde a esta versao do instalador.'
+printf '%s  %s\n' '4a58ea871f803fa69d7105011aee28407ec06443853a5e6c2352e0183616ee20' "$archive" | sha256sum -c - >> "$log" 2>&1 || fail 'ZIP nao corresponde a esta versao do instalador.'
 if pgrep -f '[s]crap_screenscraper.sh' >/dev/null 2>&1; then fail 'Encerre o Scraper antes de instalar.'; fi
 version=$(cat "$sd/System/usr/trimui/crossmix-version.txt" 2>/dev/null || :)
 case "$version" in 1.3.0*) ;; *) fail "CrossMix $version nao identificado como v1.3.0; instalacao cancelada.";; esac

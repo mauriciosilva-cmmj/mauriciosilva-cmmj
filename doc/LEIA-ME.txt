@@ -1,0 +1,68 @@
+SCRAPER PARA CROSSMIX-OS v1.3.0
+
+INSTALACAO NO CONSOLE
+1. Copie Scraper-atualizado.zip e instalar-scraper.sh para a mesma pasta
+   do cartao SD, sem renomea-los.
+2. No gerenciador de arquivos, selecione instalar-scraper.sh e execute-o.
+   Em terminal, rode: sh instalar-scraper.sh
+3. O instalador confere a versao do CrossMix, o ZIP e as somas SHA-256.
+   Ele cria um backup em /mnt/SDCARD/Apps/Scraper-backup-DATA-PID e registra
+   o resultado em /mnt/SDCARD/Apps/Scraper-instalacao.log.
+4. Depois, abra Apps > Scraper novamente.
+
+O instalador preserva System/etc/scraper.json (inclusive sua conta), ROMs,
+capas, arquivos adicionais do menu e a base regions.db existente. Se nao
+houver configuracao do Scraper, cria uma com campos de conta vazios. Ele
+substitui os scripts do Scraper apos copiar as tres pastas para o backup.
+Requer CrossMix v1.3.0 e comandos unzip, sha256sum, pgrep e ferramentas
+padrao do CrossMix. Encerre qualquer consulta antes de instalar.
+
+USO
+Selecione um console ou Consultar todos. A consulta acontece em segundo
+plano, permitindo sair do Scraper e usar outros aplicativos. O status e
+atualizado para o console atual; em Consultar todos, muda ao iniciar cada
+console. Ao reabrir o Scraper, o item ! Progresso mostra console,
+processados/total e percentual. Feche e abra o Scraper para atualizar o
+valor da lista. Abra o item para ver baixadas, existentes, falhas e estado.
+! Cancelar consulta solicita a parada do
+console atual e dos proximos. A solicitacao e cooperativa: uma requisicao
+em andamento pode demorar ate o tempo limite para terminar.
+
+A porcentagem e de ROMs processadas, nao de imagens baixadas: uma imagem
+pode ja existir ou o servico pode nao encontrar uma correspondencia. As
+contagens de baixadas, existentes e falhas sao separadas por console.
+O processamento usa a lista e os filtros de extensao do Scraper original.
+
+INDICADOR SOBRE AS TELAS
+O programa envia uma mensagem curta com console, processados/total e
+percentual e D:quantidade baixada ao OSD do Trimui enquanto houver consulta,
+somente
+quando /tmp/trimui_osd estiver disponivel. O canal pode ser compartilhado
+com outras notificacoes. A posicao, a presenca do servico e a exibicao sobre
+cada aplicativo dependem do firmware e ainda nao foram validadas no Trimui.
+Se nao aparecer, o progresso permanece no proprio Scraper. O indicador nao
+altera o firmware nem substitui a barra Wi-Fi do sistema.
+
+IDIOMA
+A leitura usa o campo language de /mnt/UDISK/system.json. br.lang e pt.lang
+ativam portugues; outros valores usam ingles como alternativa. Os nomes das
+pastas e os identificadores dos consoles permanecem os originais. O idioma
+so e consultado, nunca alterado. A opcao antiga de executar em primeiro
+plano foi ocultada nesta versao, pois a consulta agora roda em segundo plano.
+
+REVERSAO
+Feche o Scraper. Consulte o log para identificar o backup. Copie de volta
+as pastas Apps/Scraper, Emus/_Scraper e System/usr/trimui/scripts/scraper
+que estiverem dentro da pasta de backup para os mesmos caminhos no SD.
+Nao substitua System/etc/scraper.json e nao apague ROMs ou Imgs. O backup
+contem o estado anterior das pastas trocadas; arquivos extras instalados
+podem ser retirados depois de comparar os conteudos.
+
+VALIDACAO E LIMITES
+Base: https://github.com/cizia64/CrossMix-OS/tree/v1.3.0
+Os scripts passaram pela verificacao de sintaxe. Testes locais com dados e
+rede simulados cobriram o worker, contagens, preservacao de imagem anterior,
+escrita temporaria, cancelamento e traducao da estrutura do menu. A mensagem
+OSD foi gerada em simulacao. Nenhum teste no console, no compositor OSD, na
+rede ScreenScraper real ou em todos os apps foi realizado. Atualizacoes do
+CrossMix podem alterar scripts ou o caminho do OSD: mantenha o backup.
